@@ -1,40 +1,14 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const token = process.argv.length == 2 ? process.env.token : "";
-const moment = require("moment");
-require("moment-duration-format");
-const momenttz = require('moment-timezone');
-const MessageAdd = require('./db/message_add.js')
 const welcomeChannelName = "안녕하세요";
 const byeChannelName = "안녕히가세요";
 const welcomeChannelComment = "어서오세요.";
 const byeChannelComment = "안녕히가세요.";
 
 client.on('ready', () => {
-  console.log('켰다.');
-  client.user.setPresence({ game: { name: '무언가를' }, status: 'online' })
-
-  let state_list = [
-    'FIVEM 서버팩판매중',
-    'FIVEM 관련 호스팅판매중',
-    'FIVEM 서버팩샵 관리중',
-  ]
-  let state_list_index = 1;
-  let change_delay = 60000; // 이건 초입니당. 1000이 1초입니당.
-
-  function changeState() {
-    setTimeout(() => {
-      console.log( '상태 변경 -> ', state_list[state_list_index] );
-      client.user.setPresence({ game: { name: state_list[state_list_index] }, status: 'online' })
-      state_list_index += 1;
-      if(state_list_index >= state_list.length) {
-        state_list_index = 0;
-      }
-      changeState()
-    }, change_delay);
-  }
-
-  changeState();
+  console.log('봇이 정상적으로 실행 되었습니다.');
+  client.user.setPresence({ game: { name: '!도움을 쳐보세요.' }, status: 'online' })
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -55,55 +29,19 @@ client.on("guildMemberRemove", (member) => {
   byeChannel.send(`<@${deleteUser.id}> ${byeChannelComment}\n`);
 });
 
-client.on("messageUpdate", (message) => {
-  MessageSave(message, true)
-});
-
 client.on('message', (message) => {
-  MessageSave(message)
   if(message.author.bot) return;
 
-  if(message.content == 'ping') {
-    return message.reply('pong');
+  if(message.content == '!핑') {
+    return message.reply('```**5MS**```');
   }
 
-  if(message.content == '!서버') {
+  if(message.content == 'embed') {
+    let img = 'https://images-ext-2.discordapp.net/external/1eaaQzAi6FBXTuOq2j8S8rWtLLlzWtx9uQMRnEHlAO4/https/media.discordapp.net/attachments/754285340692447253/754869365517582426/communityIcon_3g8f70kyqos21.jpg';
     let embed = new Discord.RichEmbed()
-    let img = 'https://media.discordapp.net/attachments/754285340692447253/754869365517582426/communityIcon_3g8f70kyqos21.jpg';
-    var duration = moment.duration(client.uptime).format(" D [일], H [시간], m [분], s [초]");
-    embed.setColor('#705DA8')
-    embed.setAuthor('FIVE M', img)
-    embed.setFooter(`FiVE M`)
-    embed.addBlankField()
-    embed.addField('RAM usage',    `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`, true);
-    embed.addField('running time', `${duration}`, true);
-    embed.addField('user',         `${client.users.size.toLocaleString()}`, true);
-    embed.addField('server',       `${client.guilds.size.toLocaleString()}`, true);
-    // embed.addField('channel',      `${client.channels.size.toLocaleString()}`, true);
-    embed.addField('Discord.js',   `v${Discord.version}`, true);
-    embed.addField('Node',         `${process.version}`, true);
-    
-    let arr = client.guilds.array();
-    let list = '';
-    list = `\`\`\`css\n`;
-    
-    for(let i=0;i<arr.length;i++) {
-      // list += `${arr[i].name} - ${arr[i].id}\n`
-      list += `${arr[i].name}\n`
-    }
-    list += `\`\`\`\n`
-    embed.addField('list:',        `${list}`);
-
-    embed.setTimestamp()
-    message.channel.send(embed);
-  }
-
-  if(message.content == 'embed info') {
-    let img = 'https://media.discordapp.net/attachments/754285340692447253/754869365517582426/communityIcon_3g8f70kyqos21.jpg';
-    let embed = new Discord.RichEmbed()
-      .setTitle('embed')
-      .setURL('https://discord.gg/6eDcYN8')
-      .setAuthor('original', img, '')
+      .setTitle('타이틀')
+      .setURL('https://discord.gg/KGvWwV3')
+      .setAuthor('이미지를 누르면 서버에 초대.', img, 'https://discord.gg/KGvWwV3')
       .setThumbnail(img)
       .addBlankField()
       .addField('Inline field title', 'Some value here')
@@ -113,24 +51,25 @@ client.on('message', (message) => {
       .addField('Inline field title', 'Some value here1\nSome value here2\nSome value here3\n')
       .addBlankField()
       .setTimestamp()
-      .setFooter('embed info', img)
+      .setFooter('made BY ! MOON#2020', img)
 
     message.channel.send(embed)
   } else if(message.content == '!도움') {
     let helpImg = 'https://media.discordapp.net/attachments/754285340692447253/754869365517582426/communityIcon_3g8f70kyqos21.jpg';
     let commandList = [
       {name: '!도움', desc: '도움말'},
-      {name: 'embed info', desc: 'embed'},
-      {name: '!서버', desc: '서버정보 표기'},
-      {name: '!공지', desc: '공지'},
+      {name: '!핑', desc: '현재 핑 상태'},
+      {name: 'embed', desc: 'embed 예제1'},
+      {name: '!전체공지', desc: 'dm으로 전체 공지 보내기'},
+      {name: '!공지', desc: '이거 쓰세요'},
       {name: '!청소', desc: '텍스트 지움'},
-      {name: '!초대코드', desc: '영구 초대코드 생성'},
+      {name: '!초대코드', desc: '해당 채널의 초대 코드 표기'},
     ];
     let commandStr = '';
     let embed = new Discord.RichEmbed()
       .setAuthor('도움말', helpImg)
       .setColor('#705DA8')
-      .setFooter(`FIVE M`)
+      .setFooter(`Five M 서버팩 호스팅 샵`)
       .setTimestamp()
     
     commandList.forEach(x => {
@@ -170,9 +109,9 @@ client.on('message', (message) => {
     if(message.member != null) { // 채널에서 공지 쓸 때
       let contents = message.content.slice('!공지'.length);
       let embed = new Discord.RichEmbed()
-        .setAuthor('Five M 서버팩 샵')
+        .setAuthor('공지')
         .setColor('#705DA8')
-        .setFooter(`FIVE M`)
+        .setFooter(`Five M 서버팩 호스팅 샵`)
         .setTimestamp()
   
       embed.addField('전달사항 ', contents);
@@ -182,7 +121,7 @@ client.on('message', (message) => {
         x.user.send(embed)
       });
   
-      return message.reply('공지전송 완료 :white_check_mark: ');
+      return message.reply('공지를 전송했습니다.');
     } else {
       return message.reply('채널에서 실행해주세요.');
     }
@@ -195,7 +134,7 @@ client.on('message', (message) => {
         x.user.send(`<@${message.author.id}> ${contents}`);
       });
   
-      return message.reply('공지전송 완료 :white_check_mark: .');
+      return message.reply('공지를 전송했습니다.');
     } else {
       return message.reply('채널에서 실행해주세요.');
     }
@@ -206,7 +145,7 @@ client.on('message', (message) => {
     
     if(message.channel.type != 'dm' && checkPermission(message)) return
 
-    var clearLine = message.content.slice('!청소'.length);
+    var clearLine = message.content.slice('!청소 '.length);
     var isNum = !isNaN(clearLine)
 
     if(isNum && (clearLine <= 0 || 100 < clearLine)) {
@@ -266,76 +205,6 @@ async function AutoMsgDelete(message, str, delay = 3000) {
   setTimeout(() => {
     msg.delete();
   }, delay);
-}
-
-function getEmbedFields(message, modify=false) {
-  if(message.content == '' && message.embeds.length > 0) {
-    let e = message.embeds[0].fields;
-    let a = [];
-
-    for(let i=0;i<e.length;i++) {
-        a.push(`\`${e[i].name}\` - \`${e[i].value}\`\n`);
-    }
-
-    return a.join('');
-  } else if(modify) {
-    return message.author.lastMessage.content;
-  } else {
-    return message.content;
-  }
-}
-
-function MessageSave(message, modify=false) {
-  imgs = []
-  if (message.attachments.array().length > 0) {
-    message.attachments.array().forEach(x => {
-      imgs.push(x.url+'\n')
-    });
-  }
-
-  username = message.author.username.match(/[\u3131-\uD79D^a-zA-Z^0-9]/ugi)
-  channelName = message.channel.type != 'dm' ? message.channel.name : ''
-  try {
-    username = username.length > 1 ? username.join('') : username
-  } catch (error) {}
-
-  try {
-    channelName = channelName.length > 1 ? channelName.join('') : channelName
-  } catch (error) {}
-
-  var s = {
-    ChannelType: message.channel.type,
-    ChannelId: message.channel.type != 'dm' ? message.channel.id : '',
-    ChannelName: channelName,
-    GuildId: message.channel.type != 'dm' ? message.channel.guild.id : '',
-    GuildName: message.channel.type != 'dm' ? message.channel.guild.name : '',
-    Message: getEmbedFields(message, modify),
-    AuthorId: message.author.id,
-    AuthorUsername: username + '#' + message.author.discriminator,
-    AuthorBot: Number(message.author.bot),
-    Embed: Number(message.embeds.length > 0), // 0이면 false 인거다.
-    CreateTime: momenttz().tz('Asia/Seoul').locale('ko').format('ll dddd LTS')
-  }
-
-  s.Message = (modify ? '[수정됨] ' : '') + imgs.join('') + s.Message
-
-  MessageAdd(
-    s.ChannelType,
-    s.ChannelId,
-    s.ChannelName,
-    s.GuildId,
-    s.GuildName,
-    s.Message,
-    s.AuthorId,
-    s.AuthorUsername,
-    s.AuthorBot,
-    s.Embed,
-    s.CreateTime,
-  )
-    // .then((res) => {
-    //   console.log('db 저장을 했다.', res);
-    // })
-    .catch(error => console.log(error))
 }
 
 
